@@ -11,8 +11,8 @@ import scipy as sp
 from scipy.misc import factorial
 import random
 import math
-from multiprocessing.dummy import Pool as ThreadPool
-from multiprocessing.dummy import Process, Queue, Array
+from multiprocessing import Pool as ThreadPool
+from multiprocessing import Process, Queue, Array
 import timeit
 import time
 
@@ -196,7 +196,7 @@ def BuildTransMatrix_Para(params):
     
     sec = []
     p = []
-    PROCNUM = 4
+    PROCNUM = 7
     for i in range(PROCNUM):
         if i==0:
             _start = int(_total_cnt/PROCNUM)*i
@@ -218,12 +218,13 @@ def BuildTransMatrix_Para(params):
     tic = timeit.default_timer()
     for proc in p:
         proc.start()
+    for proc in p:
         proc.join()
     toc = timeit.default_timer()
     print "CORE TIME - PARA: ",
     print toc-tic
     
-    trans_prob_mat = np.asarray(trans_prob_linear.tolist()).reshape(_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P, _len_A)
+    trans_prob_mat = np.asarray(trans_prob_linear).reshape(_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P, _len_A)
     
 #     print 'done'
     return trans_prob_mat
@@ -279,7 +280,7 @@ print "Non Parallel: ",
 print toc - tic
 # print mat
 
-# print (mat==mat_para).all()
+print (mat==mat_para).all()
 
     
 # def N_mat(n1, n2, params):
