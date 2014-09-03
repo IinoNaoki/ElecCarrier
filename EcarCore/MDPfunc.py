@@ -26,7 +26,7 @@ PARAMS = {
 
 def ImmediateCost(l1,e1,n1,p1, act, params):
     if (l1 in params['L_B']) and (act==1):
-        return -1.0*params['E_B']*p1[l1]
+        return -1.0*params['E_B']*p1
     elif (l1 in params['L_S']) and (act==2):
         # 0.5 is a price
         return 0.5*params['E_S']
@@ -35,7 +35,7 @@ def ImmediateCost(l1,e1,n1,p1, act, params):
     
 def BellmanSolver(TransProb, params):
     print "MDP starts..."
-    rangeL, rangeE, rangeN, rangeP = range('L'), range('E'), range('N'), range('P')
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     
@@ -66,7 +66,7 @@ def BellmanSolver(TransProb, params):
         
 def NaiveSolver_Myopic(TransProb, params):
     print "Myopic starts..."
-    rangeL, rangeE, rangeN, rangeP = range('L'), range('E'), range('N'), range('P')
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     
@@ -102,7 +102,7 @@ def NaiveSolver_Myopic(TransProb, params):
         
 def NaiveSolver_Rnd(TransProb, params):
     print "Random..."
-    rangeL, rangeE, rangeN, rangeP = range('L'), range('E'), range('N'), range('P')
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     
@@ -136,7 +136,7 @@ def NaiveSolver_Rnd(TransProb, params):
         
 def NaiveSolver_Side(TransProb, params):
     print "Taking side action scheme..."
-    rangeL, rangeE, rangeN, rangeP = range('L'), range('E'), range('N'), range('P')
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
     

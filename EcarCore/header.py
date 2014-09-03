@@ -10,7 +10,7 @@ from scipy.misc import factorial
 import random
 import math
 from multiprocessing import Pool as ThreadPool
-from multiprocessing import Process, Queue, Array
+from multiprocessing import Process, Queue, Array, RawArray
 import timeit
 import time
 
@@ -25,7 +25,7 @@ PARAMS = {
 #           'N': 10,
 #           'P': 10,
         'L': 3,
-        'E': 3,
+        'E': 10,
         'N': 10,
         'P': 10,
           'L_NC': [0],
@@ -41,7 +41,6 @@ def min3(inp1,inp2,inp3):
     return lis.min(), np.argmin(lis)
 
 
-
 def L_mat(l1, l2, params):
     mat_l = [[1.0/(params['L']) for _ in range(params['L'])] for _ in range(params['L'])]
     
@@ -49,7 +48,7 @@ def L_mat(l1, l2, params):
         return mat_l[l1][l2]
     else:
         return 0.0
-        
+
 
 def P_mat(p1, p2, params):
     mat_p = [[1.0/(params['P']) for _ in range(params['P'])] for _ in range(params['P'])]
@@ -156,6 +155,7 @@ def HashMatIndex(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
         act
 
 def ReversedHashMatIndex(ind_lin, params):
+    # REVERSED Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
     _len_A = 3
     rem, _act = divmod(ind_lin, _len_A)
@@ -175,26 +175,20 @@ def ReversedHashMatIndex(ind_lin, params):
 def BuildTransMatrix_Para(params):
 
     def MatCalc(arr,sec, params):
-        tic = tic = timeit.default_timer()
-        print "  - ENTER " + str(sec[0])
         for _ind_lin in sec:
-#             math.factorial(500)
             l1,e1,n1,p1, l2,e2,n2,p2, act = ReversedHashMatIndex(_ind_lin, params)
             _c = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
             arr[_ind_lin] = _c 
-        toc = timeit.default_timer()
-        print ' - '+str(sec[0])+' time: ',
-        print toc - tic
+
     
     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
     _len_A = 3
     _total_cnt = (_len_L * _len_E * _len_N * _len_P) * (_len_L * _len_E * _len_N * _len_P) * _len_A
     trans_prob_linear = Array('d', np.zeros(_total_cnt))
     
-    
     sec = []
     p = []
-    PROCNUM = 7
+    PROCNUM = 12
     for i in range(PROCNUM):
         if i==0:
             _start = int(_total_cnt/PROCNUM)*i
@@ -206,7 +200,7 @@ def BuildTransMatrix_Para(params):
             _start = int(_total_cnt/PROCNUM)*i
             _end = int(_total_cnt/PROCNUM)*(i+1)
         sec.append(range(_start, _end))
-    
+
     print 'BUILDING TRANSITION MATRIX...'
     for i in range(len(sec)):
         p.append( Process(target=MatCalc, args=(trans_prob_linear, sec[i], params)) )
@@ -219,12 +213,12 @@ def BuildTransMatrix_Para(params):
     for proc in p:
         proc.join()
     toc = timeit.default_timer()
-    print "CORE TIME - PARA: ",
-    print toc-tic
+#     print "CORE TIME - PARA: ",
+#     print toc-tic
     
     trans_prob_mat = np.asarray(trans_prob_linear).reshape(_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P, _len_A)
-    
-#     print 'done'
+
+    print 'DONE'
     return trans_prob_mat
 
 
@@ -254,33 +248,36 @@ def BuildTransMatrix(params):
 #                                         math.factorial(500)
                                         trans_prob_mat[l1][e1][n1][p1][l2][e2][n2][p2][act] = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
     tac = timeit.default_timer()
-    print "CORE TIME - NON-PARA: ",
-    print tac - tic
+#     print "CORE TIME - NON-PARA: ",
+#     print tac - tic
     
-#     print 'done'
+    print 'DONE'
     return trans_prob_mat
 
-tic = timeit.default_timer()
-mat_para = BuildTransMatrix_Para(PARAMS)
-toc = timeit.default_timer()
-print "Parallel: ",
-print toc - tic
-# print mat_para
- 
-print
-print '----------------------------------------------'
-print
- 
-tic = timeit.default_timer()
-mat = BuildTransMatrix(PARAMS)
-toc = timeit.default_timer()
-print "Non Parallel: ",
-print toc - tic
-# print mat
+# tic = timeit.default_timer()
+# mat_para = BuildTransMatrix_Para(PARAMS)
+# toc = timeit.default_timer()
+# print "Parallel: ",
+# print toc - tic
+# # print mat_para
+#  
+# print
+# print '----------------------------------------------'
+# print
+#  
+# tic = timeit.default_timer()
+# mat = BuildTransMatrix(PARAMS)
+# toc = timeit.default_timer()
+# print "Non Parallel: ",
+# print toc - tic
+# # print mat
+# 
+# if (mat==mat_para).all():
+#     print "GOOD: TWO MATRICES IDENTICAL"
+# else:
+#     print "WRONG!!!!"
 
-print (mat==mat_para).all()
 
-    
 # def N_mat(n1, n2, params):
 #     def P_NPoisson(k=0):
 #         return np.exp(-1*math.pi*LAM_CONST*np.power(R_COVERAGE,2))*np.power(math.pi*LAM_CONST*np.power(R_COVERAGE,2), k)/factorial(k, exact=True)
