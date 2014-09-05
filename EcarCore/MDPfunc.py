@@ -36,8 +36,10 @@ def ImmediateCost(l1,e1,n1,p1, act, params):
 def BellmanSolver(TransProb, params):
     print "MDP starts..."
     rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
-    V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
-    A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    V_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ))
+    A_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ), dtype=np.int)
     
     while 1:
         delta = 0.0
@@ -62,13 +64,17 @@ def BellmanSolver(TransProb, params):
                         delta = delta if delta>np.fabs(V_op[l1][e1][n1][p1]-_v_old) else np.fabs(V_op[l1][e1][n1][p1]-_v_old)
         print "Delta=",delta
         if delta < params['DELTA']:
+            print "MDP DONE"
+            print
             return V_op, A_op
         
 def NaiveSolver_Myopic(TransProb, params):
     print "Myopic starts..."
     rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
-    V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
-    A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    V_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ))
+    A_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ), dtype=np.int)
     
     for l1 in rangeL:
         for e1 in rangeE:
@@ -98,13 +104,18 @@ def NaiveSolver_Myopic(TransProb, params):
                         delta = delta if delta>np.fabs(V_op[l1][e1][n1][p1]-_v_old) else np.fabs(V_op[l1][e1][n1][p1]-_v_old)
         print "Delta=",delta
         if delta < params['DELTA']:
+            print "Myopic DONE"
+            print
             return V_op, A_op
         
 def NaiveSolver_Rnd(TransProb, params):
     print "Random..."
     rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
-    V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
-    A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P']
+#     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    V_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ))
+    A_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ), dtype=np.int)
     
     for l1 in rangeL:
         for e1 in rangeE:
@@ -137,8 +148,10 @@ def NaiveSolver_Rnd(TransProb, params):
 def NaiveSolver_Side(TransProb, params):
     print "Taking side action scheme..."
     rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
-    V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
-    A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     V_op = [[[[0.0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+#     A_op = [[[[  0 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    V_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ))
+    A_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ), dtype=np.int)
     
     for l1 in rangeL:
         for e1 in rangeE:
@@ -146,10 +159,13 @@ def NaiveSolver_Side(TransProb, params):
                 for p1 in rangeP:
                     if l1 in params['L_NC']:
                         A_op[l1][e1][n1][p1] = 0
+#                         print '0 taken'
                     elif l1 in params['L_B']:
                         A_op[l1][e1][n1][p1] = 1
+#                         print '1 taken'
                     elif l1 in params['L_S']:
                         A_op[l1][e1][n1][p1] = 2
+#                         print '2 taken'
                     else:
                         print "ERROR in NaiveSolver_Side(TransProb, params)"
                         exit(0)
@@ -173,4 +189,6 @@ def NaiveSolver_Side(TransProb, params):
                         delta = delta if delta>np.fabs(V_op[l1][e1][n1][p1]-_v_old) else np.fabs(V_op[l1][e1][n1][p1]-_v_old)
         print "Delta=",delta
         if delta < params['DELTA']:
+            print "Taking side action scheme DONE"
+            print
             return V_op, A_op

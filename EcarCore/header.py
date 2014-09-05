@@ -18,23 +18,6 @@ import time
 R_COVERAGE = 10.0 # energy transfer distance of an energy gateway is 10.0
 LAM_CONST = 0.005
 
-# PARAMS including
-PARAMS = {
-#           'L': 3,
-#           'E': 10,
-#           'N': 10,
-#           'P': 10,
-        'L': 3,
-        'E': 10,
-        'N': 10,
-        'P': 10,
-          'L_NC': [0],
-          'L_B': [1],
-          'L_S': [2],
-          'E_B': 1,
-          'E_S': 1,
-          'GAM': 0.8
-          }
 
 def min3(inp1,inp2,inp3):
     lis = np.array([inp1, inp2, inp3])
@@ -138,70 +121,89 @@ def OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
     return overall_prob
 
 
-def HashMatIndex(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
-    # Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
-    _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
-    _len_A = 3
-    
-    return \
-        l1 * _len_E * _len_N * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
-        e1 * _len_N * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
-        n1 * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
-        p1 * _len_L * _len_E * _len_N * _len_P * _len_A + \
-        l2 * _len_E * _len_N * _len_P * _len_A + \
-        e2 * _len_N * _len_P * _len_A + \
-        n2 * _len_P * _len_A + \
-        p2 * _len_A + \
-        act
+# def HashMatIndex(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
+#     # Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
+#     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
+#     _len_A = params['A']
+#     
+#     return \
+#         l1 * _len_E * _len_N * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
+#         e1 * _len_N * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
+#         n1 * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
+#         p1 * _len_L * _len_E * _len_N * _len_P * _len_A + \
+#         l2 * _len_E * _len_N * _len_P * _len_A + \
+#         e2 * _len_N * _len_P * _len_A + \
+#         n2 * _len_P * _len_A + \
+#         p2 * _len_A + \
+#         act
 
-def ReversedHashMatIndex(ind_lin, params):
-    # REVERSED Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
-    _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
-    _len_A = 3
-    rem, _act = divmod(ind_lin, _len_A)
-    
-    rem, _p2 = divmod(rem, _len_P)
-    rem, _n2 = divmod(rem, _len_N)
-    rem, _e2 = divmod(rem, _len_E)
-    rem, _l2 = divmod(rem, _len_L)
-    
-    rem, _p1 = divmod(rem, _len_P)
-    rem, _n1 = divmod(rem, _len_N)
-    rem, _e1 = divmod(rem, _len_E)
-    _l1 = rem
-    
-    return _l1,_e1,_n1,_p1, _l2,_e2,_n2,_p2, _act
 
-def BuildTransMatrix_Para(params):
+def ReversedHashMatIndex(ind_lin, max_line_sizes_list):
+# INPUT 1: The index in the linear matrix
+# INPUT 2: A list, containing the maximum size of each dimension in the multi-dimensional matrix.
+# REVERSED Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
+    rem = ind_lin
+    _mod_list = [item for item in reversed(max_line_sizes_list)]
+    ind_mat = []
+      
+    for i in _mod_list:
+        rem, mod_num = divmod(rem, i)
+        ind_mat.insert(0, mod_num)
+      
+    return ind_mat
+#     
+#     _len_L, _len_E, _len_N, _len_P, _len_A = line_sizes[0], line_sizes[1], line_sizes[2], line_sizes[3], line_sizes[4] 
+#     rem, _act = divmod(ind_lin, _len_A)
+#       
+#     rem, _p2 = divmod(rem, _len_P)
+#     rem, _n2 = divmod(rem, _len_N)
+#     rem, _e2 = divmod(rem, _len_E)
+#     rem, _l2 = divmod(rem, _len_L)
+#       
+#     rem, _p1 = divmod(rem, _len_P)
+#     rem, _n1 = divmod(rem, _len_N)
+#     rem, _e1 = divmod(rem, _len_E)
+#     _l1 = rem
+#       
+#     return _l1,_e1,_n1,_p1, _l2,_e2,_n2,_p2, _act
 
+def SlicingListToSections(sec_list, proc_num, total_number):
+    for i in range(proc_num):
+        if i==0:
+            _start = int(total_number/proc_num)*i
+            _end = int(total_number/proc_num)*(i+1)
+        elif i==proc_num-1:
+            _start = int(total_number/proc_num)*i
+            _end = total_number
+        else:
+            _start = int(total_number/proc_num)*i
+            _end = int(total_number/proc_num)*(i+1)
+        sec_list.append(range(_start, _end))
+
+def BuildTransMatrix_Para(params):   
+    
     def MatCalc(arr,sec, params):
+        _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
+        _len_A = params['A']
+        _dimension_size = [_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P,  _len_A]
+        
         for _ind_lin in sec:
-            l1,e1,n1,p1, l2,e2,n2,p2, act = ReversedHashMatIndex(_ind_lin, params)
+            l1,e1,n1,p1, l2,e2,n2,p2, act = ReversedHashMatIndex(_ind_lin, _dimension_size)
             _c = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
             arr[_ind_lin] = _c 
 
     
     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
-    _len_A = 3
+    _len_A = params['A']
     _total_cnt = (_len_L * _len_E * _len_N * _len_P) * (_len_L * _len_E * _len_N * _len_P) * _len_A
     trans_prob_linear = Array('d', np.zeros(_total_cnt))
     
     sec = []
-    p = []
-    PROCNUM = 12
-    for i in range(PROCNUM):
-        if i==0:
-            _start = int(_total_cnt/PROCNUM)*i
-            _end = int(_total_cnt/PROCNUM)*(i+1)
-        elif i==PROCNUM-1:
-            _start = int(_total_cnt/PROCNUM)*i
-            _end = _total_cnt
-        else:
-            _start = int(_total_cnt/PROCNUM)*i
-            _end = int(_total_cnt/PROCNUM)*(i+1)
-        sec.append(range(_start, _end))
+    PROCNUM = 12l
+    SlicingListToSections(sec, PROCNUM, _total_cnt)
 
-    print 'BUILDING TRANSITION MATRIX...'
+    p = []
+    print 'Building transition matrix...'
     for i in range(len(sec)):
         p.append( Process(target=MatCalc, args=(trans_prob_linear, sec[i], params)) )
 #         p[-1].start()
@@ -218,22 +220,22 @@ def BuildTransMatrix_Para(params):
     
     trans_prob_mat = np.asarray(trans_prob_linear).reshape(_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P, _len_A)
 
-    print 'DONE'
+    print 'Building transition matrix...DONE'
     return trans_prob_mat
 
 
-def BuildTransMatrix(params):
-    rangeA = range(3) # 0,1,2
+def BuildTransMatrix(params): # 0,1,2
     rangeL = range(params['L'])
     rangeE = range(params['E'])
     rangeN = range(params['N'])
     rangeP = range(params['P'])
+    rangeA = range(params['A'])
     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
-    _len_A = 3
+    _len_A = params['A']
     
     trans_prob_mat = np.zeros((_len_L, _len_E, _len_N, _len_P,_len_L, _len_E, _len_N, _len_P,_len_A))
     
-    print 'BUILDING TRANSITION MATRIX...'
+    print 'Building transition matrix...'
     
     tic = timeit.default_timer()
     for l1 in rangeL:
@@ -251,7 +253,7 @@ def BuildTransMatrix(params):
 #     print "CORE TIME - NON-PARA: ",
 #     print tac - tic
     
-    print 'DONE'
+    print 'Building transition matrix...DONE'
     return trans_prob_mat
 
 # tic = timeit.default_timer()
@@ -308,3 +310,37 @@ def BuildTransMatrix(params):
 #         print N_mat(x,y,None),
 #         print '   ',
 #     print
+
+
+def GetOptResultList(V,A, transmat, params):
+#     rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
+    _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P']
+    
+    V_linear = V.reshape(1, _len_L*_len_E*_len_N*_len_P)[0]
+    A_linear = A.reshape(1, _len_L*_len_E*_len_N*_len_P)[0]
+    _act = np.bincount(A_linear)
+    while len(_act) < 3:
+        _act = np.append(_act, 0)
+    
+    v_avg = np.average(V_linear) # AVERAGE COST
+    a1_avg = _act[1]*1.0/(1.0*len(A_linear)) # ACT_1_AVG
+    
+    return v_avg, a1_avg
+    
+#     v_avg = 0.0
+#     a_avg = 0.0
+#         
+#     for l1 in rangeL:
+#         for e1 in rangeE:
+#             for n1 in rangeN:
+#                 for p1 in rangeP:
+#                     # GetValueAvg
+#                     v_avg = v_avg + V[l1][e1][n1][p1]
+# 
+#                     # GetActionAvg
+#                     a_avg = a_avg + A[l1][e1][n1][p1]
+# 
+#     v_avg = v_avg*1.0 / (1.0*len(rangeL)*len(rangeE)*len(rangeN)*len(rangeP))
+#     a_avg = a_avg*1.0 / (1.0*len(rangeL)*len(rangeE)*len(rangeN)*len(rangeP))
+#     
+#     return [v_avg, a_avg] 
