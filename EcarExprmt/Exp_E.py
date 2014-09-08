@@ -14,20 +14,27 @@ import sys
 sys.path.append("..")
 
 from EcarCore.MDPfunc import *
+from EcarCore.header import *
 
-
+############################################
+# PARAMETERS
+############################################
 L = 3
 # left blank purposely for E
-N = 10
+# N Calculated from LAM and R_COVERAGE
 P = 5
 A = 3
 L_NC, L_B, L_S = [0], [1], [2]
 E_B, E_S = 1, 1
-GAM = 0.8
-DELTA = 0.1
+GAM = 0.95
+DELTA = 0.01
+LAM = 0.0001
+R_COVERAGE = 10.0
+############################################
 
-# E_list = [1,2,3,4,5,6,7,8,9,10]
-E_list = [1,2]
+
+E_list = [1,2,3,4,5,6,7,8,9,10]
+# E_list = [3,4,5,6,7]
 expnum = len(E_list)
 
 ParamsSet = [None for _ in range(expnum)]
@@ -43,18 +50,20 @@ tic = timeit.default_timer()
 for ind, e_cur in enumerate(E_list):
     print "---- ROUND:", ind+1,
     print "out of", expnum
+    N = GetUpperboundN(LAM, R_COVERAGE)[0]
     ParamsSet[ind] = {'L': L, 'E': e_cur, 'N': N, 'P': P, \
                       'A': A, \
                       'L_NC': L_NC, 'L_B': L_B, 'L_S': L_S, \
                       'E_B': E_B, 'E_S': E_S, \
-                      'GAM': GAM, 'DELTA': DELTA
+                      'GAM': GAM, 'DELTA': DELTA, \
+                      'LAM': LAM, 'R_COVERAGE': R_COVERAGE
                       }
     TransProbSet[ind] = BuildTransMatrix_Para(ParamsSet[ind])
     
     # Bellman
     V_bell, A_bell = BellmanSolver(TransProbSet[ind], ParamsSet[ind])
     RESset_bell[ind] = GetOptResultList(V_bell,A_bell, TransProbSet[ind], ParamsSet[ind])
-    
+     
     # Myopic
     V_myo, A_myo = NaiveSolver_Myopic(TransProbSet[ind], ParamsSet[ind])
     RESset_myo[ind] = GetOptResultList(V_myo,A_myo, TransProbSet[ind], ParamsSet[ind])

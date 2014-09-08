@@ -41,31 +41,70 @@ def P_mat(p1, p2, params):
     else:
         return 0.0
 
+    
+def P_SpatialPoisson_Pure(k, LAM, R_COVERAGE):
+    return np.exp(-1*math.pi*LAM*np.power(R_COVERAGE,2))*np.power(math.pi*LAM*np.power(R_COVERAGE,2), k)/factorial(k)
 
-# THIS FUNCTION IS ONLY FOR TEMPORARY USE
+def GetUpperboundN(LAM, R_COVERAGE):
+    _n = 0
+    _sum = 0.0
+    while 1:
+        _sum = _sum + P_SpatialPoisson_Pure(_n, LAM, R_COVERAGE)
+        _residual = 1.0 - _sum
+        if _residual < 0.0001:
+            return _n + 1, _residual
+        else:
+            _n = _n + 1
+
+
 def N_mat(n1, n2, l1, l2, params):
+    _LAM = params['LAM']
+    _R_COVERAGE = params['R_COVERAGE']
+    _N, _residual = GetUpperboundN(_LAM, _R_COVERAGE)
     
     if (l2 in params['L_NC']) or (l2 in params['L_B']):
-        if n2==0:
+        if (n1 in range(_N)) and n2==0:
             return 1.0
         else:
             return 0.0
     elif l2 in params['L_S']:
-        mat_n = [[1.0/(params['N']) for _ in range(params['N'])] for _ in range(params['N'])]
-        if (n1 in range(params['N'])) and (n2 in range(params['N'])):
-            return mat_n[n1][n2]
-        else:
+        if n1 not in range(_N):
             return 0.0
+        else:
+            if n2 not in range(_N):
+                return 0.0
+            elif n2==_N-1:
+                return P_SpatialPoisson_Pure(n2, _LAM, _R_COVERAGE) + _residual
+            else:
+                return P_SpatialPoisson_Pure(n2, _LAM, _R_COVERAGE)        
     else:
         return 0.0
-    
-    
+
+
+# THIS FUNCTION IS ONLY FOR TEMPORARY USE
+# def N_mat_temp(n1, n2, l1, l2, params):
+#     if (l2 in params['L_NC']) or (l2 in params['L_B']):
+#         if n2==0:
+#             return 1.0
+#         else:
+#             return 0.0
+#     elif l2 in params['L_S']:
+#         mat_n = [[1.0/(params['N']) for _ in range(params['N'])] for _ in range(params['N'])]
+#         if (n1 in range(params['N'])) and (n2 in range(params['N'])):
+#             return mat_n[n1][n2]
+#         else:
+#             return 0.0
+#     else:
+#         return 0.0
+
+
 def E_mat(e1, e2, l1, l2,  act, params):
-    eta_prob = 0.8
-    xi_prob = 0.95
+    eta_prob = 0.85 # prob of succ charging
+    xi_prob = 0.99  # prob of succ transferring
+    
     rangeE = range(params['E'])
     
-    if act==0:
+    if act==0: # DO NOTHING
         if e1==e2 and (e1 in rangeE) and (e2 in rangeE):
             return 1.0
         else:
@@ -87,7 +126,7 @@ def E_mat(e1, e2, l1, l2,  act, params):
             else:
                 if e1==e2:
                     return 1.0 - eta_prob
-                elif e2 == 1+e1:
+                elif e2 == min(e1+params['E_B'], params['E']-1):
                     return eta_prob
                 else:
                     return 0.0
@@ -104,7 +143,7 @@ def E_mat(e1, e2, l1, l2,  act, params):
         else:
             if e1==e2:
                 return 1.0 - xi_prob
-            elif e2==e1-1:
+            elif e2==max(0, e1-params['E_S']):
                 return xi_prob
             else:
                 return 0.0
@@ -121,29 +160,27 @@ def OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
     return overall_prob
 
 
-# def HashMatIndex(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
-#     # Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
-#     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
-#     _len_A = params['A']
-#     
-#     return \
-#         l1 * _len_E * _len_N * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
-#         e1 * _len_N * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
-#         n1 * _len_P * _len_L * _len_E * _len_N * _len_P * _len_A + \
-#         p1 * _len_L * _len_E * _len_N * _len_P * _len_A + \
-#         l2 * _len_E * _len_N * _len_P * _len_A + \
-#         e2 * _len_N * _len_P * _len_A + \
-#         n2 * _len_P * _len_A + \
-#         p2 * _len_A + \
-#         act
+def HashMatIndex(ind_mat, max_dimension_sizes_list):
+    # Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
+    if not len(ind_mat)==len(max_dimension_sizes_list):
+        print "Error in HashMatIndex"
+        exit(0)
+    prodnt = np.append(np.delete(max_dimension_sizes_list,0),1)
+    _sum = 0
+    for i,item in enumerate(ind_mat):
+        _tmp = 1
+        for j in range(i,len(prodnt)):
+            _tmp = _tmp * prodnt[j]
+        _sum = _sum + item*_tmp
+    return int(_sum)
 
 
-def ReversedHashMatIndex(ind_lin, max_line_sizes_list):
+def ReversedHashMatIndex(ind_lin, max_dimension_sizes_list):
 # INPUT 1: The index in the linear matrix
 # INPUT 2: A list, containing the maximum size of each dimension in the multi-dimensional matrix.
 # REVERSED Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
     rem = ind_lin
-    _mod_list = [item for item in reversed(max_line_sizes_list)]
+    _mod_list = [item for item in reversed(max_dimension_sizes_list)]
     ind_mat = []
       
     for i in _mod_list:
@@ -182,11 +219,10 @@ def SlicingListToSections(sec_list, proc_num, total_number):
 
 def BuildTransMatrix_Para(params):   
     
-    def MatCalc(arr,sec, params):
+    def subfunc_MatCalc(arr,sec, params):
         _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
         _len_A = params['A']
         _dimension_size = [_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P,  _len_A]
-        
         for _ind_lin in sec:
             l1,e1,n1,p1, l2,e2,n2,p2, act = ReversedHashMatIndex(_ind_lin, _dimension_size)
             _c = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
@@ -199,28 +235,22 @@ def BuildTransMatrix_Para(params):
     trans_prob_linear = Array('d', np.zeros(_total_cnt))
     
     sec = []
-    PROCNUM = 12l
+    PROCNUM = 12
     SlicingListToSections(sec, PROCNUM, _total_cnt)
 
     p = []
     print 'Building transition matrix...'
     for i in range(len(sec)):
-        p.append( Process(target=MatCalc, args=(trans_prob_linear, sec[i], params)) )
-#         p[-1].start()
-#         p[-1].join()
-    
-    tic = timeit.default_timer()
-    for proc in p:
+        proc = Process(target=subfunc_MatCalc, args=(trans_prob_linear, sec[i], params))
         proc.start()
+        p.append(proc)
+        
     for proc in p:
         proc.join()
-    toc = timeit.default_timer()
-#     print "CORE TIME - PARA: ",
-#     print toc-tic
     
     trans_prob_mat = np.asarray(trans_prob_linear).reshape(_len_L, _len_E, _len_N, _len_P, _len_L, _len_E, _len_N, _len_P, _len_A)
 
-    print 'Building transition matrix...DONE'
+    print 'Building transition matrix...[DONE]'
     return trans_prob_mat
 
 
@@ -237,7 +267,6 @@ def BuildTransMatrix(params): # 0,1,2
     
     print 'Building transition matrix...'
     
-    tic = timeit.default_timer()
     for l1 in rangeL:
         for e1 in rangeE:
             for n1 in rangeN:
@@ -249,98 +278,70 @@ def BuildTransMatrix(params): # 0,1,2
                                     for act in rangeA:
 #                                         math.factorial(500)
                                         trans_prob_mat[l1][e1][n1][p1][l2][e2][n2][p2][act] = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
-    tac = timeit.default_timer()
-#     print "CORE TIME - NON-PARA: ",
-#     print tac - tic
     
-    print 'Building transition matrix...DONE'
+    print 'Building transition matrix...[DONE]'
     return trans_prob_mat
 
-# tic = timeit.default_timer()
-# mat_para = BuildTransMatrix_Para(PARAMS)
-# toc = timeit.default_timer()
-# print "Parallel: ",
-# print toc - tic
-# # print mat_para
-#  
-# print
-# print '----------------------------------------------'
-# print
-#  
-# tic = timeit.default_timer()
-# mat = BuildTransMatrix(PARAMS)
-# toc = timeit.default_timer()
-# print "Non Parallel: ",
-# print toc - tic
-# # print mat
-# 
-# if (mat==mat_para).all():
-#     print "GOOD: TWO MATRICES IDENTICAL"
-# else:
-#     print "WRONG!!!!"
 
-
-# def N_mat(n1, n2, params):
-#     def P_NPoisson(k=0):
-#         return np.exp(-1*math.pi*LAM_CONST*np.power(R_COVERAGE,2))*np.power(math.pi*LAM_CONST*np.power(R_COVERAGE,2), k)/factorial(k, exact=True)
-#     def AppxSumToOne(n2=0):
-#         '''
-#         summation of P^{N}(0), P^{N}(1), to P^{N}(N2)
-#         The function is used to check if P^{N}(N2+1) should be neglected  
-#         '''
-#         if n2<0:
-#             return 0
-#         else:
-#             return P_NPoisson(n2) + AppxSumToOne(n2-1) 
-#     if 1.0-AppxSumToOne(n2-1)<0.0001:
-#         return 0
-# #         return 1.0-AppxSumToOne(n2-1)
-#     else:
-#         return P_NPoisson(n2)
-# 
-# def GetParameterN():  # N starts from ZERO! [0,1,2,...N_max-1]
-#     for i in range(65535):
-#         if N_mat(0,i,None)==0:
-#             return i-1+1
-#   
-# N_max = GetParameterN() # N starts from ZERO! [0,1,2,...N_max-1]
-# 
-# for x in range(N_max):
-#     for y in range(N_max):
-#         print N_mat(x,y,None),
-#         print '   ',
-#     print
+def SteadyStateMatrix(transmat, optA, params):
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
+    total_dim = params['L'] * params['E'] * params['N'] * params['P']
+    expanded_matrix = np.matrix( [[0.0 for _ in range(total_dim)] for _ in range(total_dim)] )
+    search_list = [[[[-1 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    
+    expd_x_ind, expd_y_ind = 0, 0
+    for l1 in rangeL:
+        for e1 in rangeE:
+            for n1 in rangeN:
+                for p1 in rangeP:
+                    for l2 in rangeL:
+                        for e2 in rangeE:
+                            for n2 in rangeN:
+                                for p2 in rangeP:
+                                    act = optA[l1][e1][n1][p1]
+                                    expanded_matrix[expd_x_ind, expd_y_ind] = transmat[l1][e1][n1][p1][l2][e2][n2][p2][act]
+                                    expd_y_ind = expd_y_ind + 1
+                    search_list[l1][e1][n1][p1] = expd_x_ind
+                    expd_x_ind = expd_x_ind + 1
+                    expd_y_ind = 0
+    
+    p_hat = expanded_matrix - np.diag(np.array([1.0 for _ in range(total_dim)]))
+    for x in range(total_dim):
+        p_hat[x,total_dim-1] = 1.0
+    a_rhs = np.zeros(total_dim)
+    a_rhs[total_dim-1] = 1.0
+    steady_p = a_rhs * p_hat.getI()
+    steady_p_transf = [[[[-1 for _ in rangeP] for _ in rangeN] for _ in rangeE] for _ in rangeL]
+    
+    for l in rangeL:
+        for e in rangeE:
+            for n in rangeN:
+                for p in rangeP:
+                    steady_p_transf[l][e][n][p] = steady_p[0,search_list[l][e][n][p]]
+    return steady_p_transf
+    
 
 
 def GetOptResultList(V,A, transmat, params):
-#     rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P']
-    
-    V_linear = V.reshape(1, _len_L*_len_E*_len_N*_len_P)[0]
+    steady_mat = SteadyStateMatrix(transmat, A, params)
+        
+    V_linear = V.reshape(1, _len_L*_len_E*_len_N*_len_P)[0]    
+    v_avg = np.average(V_linear) # AVERAGE COST
     A_linear = A.reshape(1, _len_L*_len_E*_len_N*_len_P)[0]
     _act = np.bincount(A_linear)
     while len(_act) < 3:
         _act = np.append(_act, 0)
-    
-    v_avg = np.average(V_linear) # AVERAGE COST
     a1_avg = _act[1]*1.0/(1.0*len(A_linear)) # ACT_1_AVG
+    a2_avg = _act[2]*1.0/(1.0*len(A_linear)) # ACT_2_AVG
     
-    return v_avg, a1_avg
+    e_steady = 0.0
+    for l1 in rangeL:
+        for e1 in rangeE:
+            for n1 in rangeN:
+                for p1 in rangeP:
+                    e_steady = e_steady + 1.0 * e1 * steady_mat[l1][e1][n1][p1]
     
-#     v_avg = 0.0
-#     a_avg = 0.0
-#         
-#     for l1 in rangeL:
-#         for e1 in rangeE:
-#             for n1 in rangeN:
-#                 for p1 in rangeP:
-#                     # GetValueAvg
-#                     v_avg = v_avg + V[l1][e1][n1][p1]
-# 
-#                     # GetActionAvg
-#                     a_avg = a_avg + A[l1][e1][n1][p1]
-# 
-#     v_avg = v_avg*1.0 / (1.0*len(rangeL)*len(rangeE)*len(rangeN)*len(rangeP))
-#     a_avg = a_avg*1.0 / (1.0*len(rangeL)*len(rangeE)*len(rangeN)*len(rangeP))
-#     
-#     return [v_avg, a_avg] 
+    return v_avg, a1_avg, a2_avg, e_steady
+
