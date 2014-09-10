@@ -122,5 +122,6 @@ y_QoS_steady_side  = [RESset_side[i][4] for i in range(expnum)]
 # show()
 
 
-
-ShowMatrix(A_opt_set_bell[1], 'a', ['l','p'], [1,1], params_set[1])
+for i in range(4,len(params_set)):
+    ShowMatrix(A_opt_set_bell[i], 'a', ['l','e'], [1,4], params_set[i])
+    print '-----------------------------'
