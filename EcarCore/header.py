@@ -15,23 +15,21 @@ import timeit
 import time
 
 
-R_COVERAGE = 10.0 # energy transfer distance of an energy gateway is 10.0
-LAM_CONST = 0.005
 
-
-def min3(inp1,inp2,inp3):
+def max3(inp1,inp2,inp3):
     lis = np.array([inp1, inp2, inp3])
-    return lis.min(), np.argmin(lis)
+    return lis.max(), np.argmax(lis)
 
 
 def L_mat(l1, l2, params):
-    mat_l = [[1.0/(params['L']) for _ in range(params['L'])] for _ in range(params['L'])]
-    
+#     mat_l = [[1.0/(params['L']) for _ in range(params['L'])] for _ in range(params['L'])]
+    mat_l = [[0.02, 0.29, 0.69],
+             [0.02, 0.29, 0.69],
+             [0.02, 0.29, 0.69]]
     if (l1 in range(params['L'])) and (l2 in range(params['L'])):
         return mat_l[l1][l2]
     else:
         return 0.0
-
 
 def P_mat(p1, p2, params):
     mat_p = [[1.0/(params['P']) for _ in range(params['P'])] for _ in range(params['P'])]
@@ -55,7 +53,6 @@ def GetUpperboundN(LAM, R_COVERAGE):
             return _n + 1, _residual
         else:
             _n = _n + 1
-
 
 def N_mat(n1, n2, l1, l2, params):
     _LAM = params['LAM']
@@ -159,6 +156,91 @@ def OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params):
                          P_mat(p1, p2, params)
     return overall_prob
 
+def ShowMatrix(Mat, mode, fixdims, fixnums, params):
+    if Mat==None:
+        print "ERROR INPUT ShowMatrix()"
+        exit()
+        
+    if mode=='a': # Show action
+        print "---ACTION MATRIX---"
+    elif mode=='v': # Show value
+        print "---UTILITY MATRIX---"
+    else:
+        print "ERROR, UNKNOWN MATRIX"
+        exit()
+#     print 'here'
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
+    dimList = ['l', 'e', 'n', 'p']
+    feasList = [rangeL, rangeE, rangeN, rangeP]
+    for item in fixdims:
+        del(feasList[dimList.index(item)])
+        del(dimList[dimList.index(item)])
+    print 'Line: ', dimList[0]
+    print 'Column: ', dimList[1]
+    
+#     print 'here'
+    fix1, fix2 = fixnums[0], fixnums[1]
+    for ra in feasList[0]:
+        for rb in feasList[1]:
+            if fixdims==['l','e']:
+                if mode=='a':
+                    print "%d" % Mat[fix1][fix2][ra][rb],
+                elif mode=='v':
+                    print "%8.3f" % Mat[fix1][fix2][ra][rb],
+                else:
+                    print "ERROR, POS 1"
+                    exit()
+                print ' ',
+            elif fixdims==['l','n']:
+                if mode=='a':
+                    print "%d" % Mat[fix1][ra][fix2][rb],
+                elif mode=='v':
+                    print "%8.3f" % Mat[fix1][ra][fix2][rb],
+                else:
+                    print "ERROR, POS 2"
+                    exit()
+                print ' ',
+            elif fixdims==['l','p']:
+                if mode=='a':
+                    print "%d" % Mat[fix1][ra][rb][fix2],
+                elif mode=='v':
+                    print "%8.3f" % Mat[fix1][ra][rb][fix2],
+                else:
+                    print "ERROR, POS 3"
+                    exit()
+                print ' ',
+            elif fixdims==['e','n']:
+                if mode=='a':
+                    print "%d" % Mat[ra][fix1][fix2][rb],
+                elif mode=='v':
+                    print "%8.3f" % Mat[ra][fix1][fix2][rb],
+                else:
+                    print "ERROR, POS 4"
+                    exit()
+                print ' ',
+            elif fixdims==['e','p']:
+                if mode=='a':
+                    print "%d" % Mat[ra][fix1][rb][fix2],
+                elif mode=='v':
+                    print "%8.3f" % Mat[ra][fix1][rb][fix2],
+                else:
+                    print "ERROR, POS 5"
+                    exit()
+                print ' ',
+            elif fixdims==['n','p']:
+                if mode=='a':
+                    print "%d" % Mat[ra][rb][fix1][fix2],
+                elif mode=='v':
+                    print "%8.3f" % Mat[ra][rb][fix1][fix2],
+                else:
+                    print "ERROR, POS 6"
+                    exit()
+                print ' ',
+            else:
+                print "ERROR, POS 7"
+                exit()
+        print
+    
 
 def HashMatIndex(ind_mat, max_dimension_sizes_list):
     # Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...Ha...sh
@@ -254,33 +336,33 @@ def BuildTransMatrix_Para(params):
     return trans_prob_mat
 
 
-def BuildTransMatrix(params): # 0,1,2
-    rangeL = range(params['L'])
-    rangeE = range(params['E'])
-    rangeN = range(params['N'])
-    rangeP = range(params['P'])
-    rangeA = range(params['A'])
-    _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
-    _len_A = params['A']
-    
-    trans_prob_mat = np.zeros((_len_L, _len_E, _len_N, _len_P,_len_L, _len_E, _len_N, _len_P,_len_A))
-    
-    print 'Building transition matrix...'
-    
-    for l1 in rangeL:
-        for e1 in rangeE:
-            for n1 in rangeN:
-                for p1 in rangeP:
-                    for l2 in rangeL:
-                        for e2 in rangeE:
-                            for n2 in rangeN:
-                                for p2 in rangeP:
-                                    for act in rangeA:
-#                                         math.factorial(500)
-                                        trans_prob_mat[l1][e1][n1][p1][l2][e2][n2][p2][act] = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
-    
-    print 'Building transition matrix...[DONE]'
-    return trans_prob_mat
+# def BuildTransMatrix(params): # 0,1,2
+#     rangeL = range(params['L'])
+#     rangeE = range(params['E'])
+#     rangeN = range(params['N'])
+#     rangeP = range(params['P'])
+#     rangeA = range(params['A'])
+#     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P'] 
+#     _len_A = params['A']
+#     
+#     trans_prob_mat = np.zeros((_len_L, _len_E, _len_N, _len_P,_len_L, _len_E, _len_N, _len_P,_len_A))
+#     
+#     print 'Building transition matrix...'
+#     
+#     for l1 in rangeL:
+#         for e1 in rangeE:
+#             for n1 in rangeN:
+#                 for p1 in rangeP:
+#                     for l2 in rangeL:
+#                         for e2 in rangeE:
+#                             for n2 in rangeN:
+#                                 for p2 in rangeP:
+#                                     for act in rangeA:
+# #                                         math.factorial(500)
+#                                         trans_prob_mat[l1][e1][n1][p1][l2][e2][n2][p2][act] = OverallTransProb(l1,e1,n1,p1, l2,e2,n2,p2, act, params)
+#     
+#     print 'Building transition matrix...[DONE]'
+#     return trans_prob_mat
 
 
 def SteadyStateMatrix(transmat, optA, params):
@@ -337,11 +419,21 @@ def GetOptResultList(V,A, transmat, params):
     a2_avg = _act[2]*1.0/(1.0*len(A_linear)) # ACT_2_AVG
     
     e_steady = 0.0
+    QoS_steady = 0.0
+    a1_steady = 0.0
+    a2_steady = 0.0
     for l1 in rangeL:
         for e1 in rangeE:
             for n1 in rangeN:
                 for p1 in rangeP:
                     e_steady = e_steady + 1.0 * e1 * steady_mat[l1][e1][n1][p1]
+                    if A[l1][e1][n1][p1] == 1:
+                        a1_steady = a1_steady + 1.0 * steady_mat[l1][e1][n1][p1]
+                    if A[l1][e1][n1][p1] == 2:
+                        a2_steady = a2_steady + 1.0 * steady_mat[l1][e1][n1][p1]
+                    if (l1 in params['L_S']) and (e1>=params['E_S']) and (A[l1][e1][n1][p1]==2):
+                        QoS_steady = QoS_steady +  1.0*steady_mat[l1][e1][n1][p1]
     
-    return v_avg, a1_avg, a2_avg, e_steady
+    return v_avg, a1_steady, a2_steady, e_steady, QoS_steady
+#            0       1           2         3          4
 
