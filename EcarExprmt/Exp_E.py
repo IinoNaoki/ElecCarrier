@@ -34,7 +34,7 @@ R_COVERAGE = 10.0
 
 
 E_list = [1,2,3,4,5,6,7,8,9,10]
-# E_list = [1,2,3]
+# E_list = [1,2,3,4,5]
 expnum = len(E_list)
 
 ParamsSet = [None for _ in range(expnum)]
@@ -72,14 +72,25 @@ for ind, e_cur in enumerate(E_list):
     # Myopic
     V_myo, A_myo = NaiveSolver_Myopic(TransProbSet[ind], ParamsSet[ind])
     RESset_myo[ind] = GetOptResultList(V_myo,A_myo, TransProbSet[ind], ParamsSet[ind])
-    
+     
     # Taking sides
     V_side, A_side = NaiveSolver_Side(TransProbSet[ind], ParamsSet[ind])
     RESset_side[ind] = GetOptResultList(V_side,A_side, TransProbSet[ind], ParamsSet[ind])
     
     # rndmzd
-#     V_rnd, A_rnd = NaiveSolver_Rnd(TransProbSet[ind], ParamsSet[ind])
-#     RESset_rnd[ind] = GetOptResultList(V_rnd,A_rnd, TransProbSet[ind], ParamsSet[ind])
+#     RANDOM_COUNT = 10
+#     RE = []
+#     for rcount in range(RANDOM_COUNT):
+#         print "RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
+#         V_rnd, A_rnd = NaiveSolver_Rnd(TransProbSet[ind], ParamsSet[ind])
+#         RE_rnd = GetOptResultList(V_rnd,A_rnd, TransProbSet[ind], ParamsSet[ind])
+#         if rcount == 0:
+#             RE = [0.0 for _ in range(len(RE_rnd))]
+#         for i in range(len(RE_rnd)):
+#             RE[i] = RE[i] + RE_rnd[i]
+#     for i in range(len(RE)):
+#         RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
+#     RESset_rnd[ind] = RE
     
 toc = timeit.default_timer()
 print
@@ -93,7 +104,7 @@ pickle.dump(E_list, open("../results/E_changing/xaxis","w"))
 pickle.dump(RESset_bell, open("../results/E_changing/bell","w"))
 pickle.dump(RESset_myo, open("../results/E_changing/myo","w"))
 pickle.dump(RESset_side, open("../results/E_changing/side","w"))
-# pickle.dump(RESset_rnd, open("../results/E_changing/rnd","w"))
+pickle.dump(RESset_rnd, open("../results/E_changing/rnd","w"))
 pickle.dump(V_opt_set_bell, open("../results/E_changing/V_opt_bell","w"))
 pickle.dump(A_opt_set_bell, open("../results/E_changing/A_opt_bell","w"))
 print "Finished"

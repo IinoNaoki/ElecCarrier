@@ -35,7 +35,6 @@ R_COVERAGE = 10.0
 
 LAM_list = [0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009, 0.01]
 # LAM_list = [0.000, 0.001,0.002]
-# E_list = [3,4,5,6,7]
 expnum = len(LAM_list)
 
 ParamsSet = [None for _ in range(expnum)]
@@ -45,6 +44,9 @@ RESset_bell = [None for _ in range(expnum)]
 RESset_myo = [None for _ in range(expnum)]
 RESset_side = [None for _ in range(expnum)]
 RESset_rnd = [None for _ in range(expnum)]
+
+V_opt_set_bell = [None for _ in range(expnum)]
+A_opt_set_bell = [None for _ in range(expnum)]
 
 tic = timeit.default_timer()
 
@@ -63,6 +65,8 @@ for ind, lam_cur in enumerate(LAM_list):
     
     # Bellman
     V_bell, A_bell = BellmanSolver(TransProbSet[ind], ParamsSet[ind])
+    V_opt_set_bell[ind] = V_bell
+    A_opt_set_bell[ind] = A_bell 
     RESset_bell[ind] = GetOptResultList(V_bell,A_bell, TransProbSet[ind], ParamsSet[ind])
      
     # Myopic
@@ -74,8 +78,19 @@ for ind, lam_cur in enumerate(LAM_list):
     RESset_side[ind] = GetOptResultList(V_side,A_side, TransProbSet[ind], ParamsSet[ind])
     
     # rndmzd
-#     V_rnd, A_rnd = NaiveSolver_Rnd(TransProbSet[ind], ParamsSet[ind])
-#     RESset_rnd[ind] = GetOptResultList(V_rnd,A_rnd, TransProbSet[ind], ParamsSet[ind])
+#     RANDOM_COUNT = 10
+#     RE = []
+#     for rcount in range(RANDOM_COUNT):
+#         print "RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
+#         V_rnd, A_rnd = NaiveSolver_Rnd(TransProbSet[ind], ParamsSet[ind])
+#         RE_rnd = GetOptResultList(V_rnd,A_rnd, TransProbSet[ind], ParamsSet[ind])
+#         if rcount == 0:
+#             RE = [0.0 for _ in range(len(RE_rnd))]
+#         for i in range(len(RE_rnd)):
+#             RE[i] = RE[i] + RE_rnd[i]
+#     for i in range(len(RE)):
+#         RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
+#     RESset_rnd[ind] = RE
     
 toc = timeit.default_timer()
 print
@@ -89,5 +104,7 @@ pickle.dump(LAM_list, open("../results/LAM_changing/xaxis","w"))
 pickle.dump(RESset_bell, open("../results/LAM_changing/bell","w"))
 pickle.dump(RESset_myo, open("../results/LAM_changing/myo","w"))
 pickle.dump(RESset_side, open("../results/LAM_changing/side","w"))
-# pickle.dump(RESset_rnd, open("../results/LAM_changing/rnd","w"))
+pickle.dump(RESset_rnd, open("../results/LAM_changing/rnd","w"))
+pickle.dump(V_opt_set_bell, open("../results/LAM_changing/V_opt_bell","w"))
+pickle.dump(A_opt_set_bell, open("../results/LAM_changing/A_opt_bell","w"))
 print "Finished"

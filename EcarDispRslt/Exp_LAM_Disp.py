@@ -20,7 +20,7 @@ x_axis_list = pickle.load(open("../results/LAM_changing/xaxis","r"))
 RESset_bell = pickle.load(open("../results/LAM_changing/bell","r"))
 RESset_myo = pickle.load(open("../results/LAM_changing/myo","r"))
 RESset_side = pickle.load(open("../results/LAM_changing/side","r"))
-# RESset_rnd = pickle.load(open("../results/LAM_changing/rnd","r"))
+RESset_rnd = pickle.load(open("../results/LAM_changing/rnd","r"))
 
 
 y_v_avg_bell = [RESset_bell[i][0] for i in range(expnum)]

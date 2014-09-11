@@ -23,9 +23,12 @@ def max3(inp1,inp2,inp3):
 
 def L_mat(l1, l2, params):
 #     mat_l = [[1.0/(params['L']) for _ in range(params['L'])] for _ in range(params['L'])]
-    mat_l = [[0.02, 0.29, 0.69],
-             [0.02, 0.29, 0.69],
-             [0.02, 0.29, 0.69]]
+    if params.has_key('L_MAT'):
+        mat_l = params['L_MAT']
+    else:
+        mat_l = [[0.02, 0.29, 0.69],
+                 [0.02, 0.29, 0.69],
+                 [0.02, 0.29, 0.69]]
     if (l1 in range(params['L'])) and (l2 in range(params['L'])):
         return mat_l[l1][l2]
     else:
