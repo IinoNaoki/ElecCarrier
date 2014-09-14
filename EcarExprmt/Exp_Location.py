@@ -33,9 +33,9 @@ R_COVERAGE = 10.0
 ############################################
 
 L_MAT_list = [
-              [[0.6,0.2,0.2],[0.6,0.2,0.2],[0.6,0.2,0.2]], # matrix 1
-              [[0.2,0.6,0.2],[0.2,0.6,0.2],[0.2,0.6,0.2]], # matrix 2
-              [[0.2,0.2,0.6],[0.2,0.2,0.6],[0.2,0.2,0.6]]  # matrix 3
+              [[0.7,0.15,0.15],[0.7,0.15,0.15],[0.7,0.15,0.15]], # matrix 1
+              [[0.15,0.7,0.15],[0.15,0.7,0.15],[0.15,0.7,0.15]], # matrix 2
+              [[0.15,0.15,0.7],[0.15,0.15,0.7],[0.15,0.15,0.7]]  # matrix 3
               ]
 L_MAT_list_countable = range(1,len(L_MAT_list)+1)
 
@@ -48,6 +48,7 @@ RESset_bell = [None for _ in range(expnum)]
 RESset_myo = [None for _ in range(expnum)]
 RESset_side = [None for _ in range(expnum)]
 RESset_rnd = [None for _ in range(expnum)]
+RESset_sidernd = [None for _ in range(expnum)]
 
 V_opt_set_bell = [None for _ in range(expnum)]
 A_opt_set_bell = [None for _ in range(expnum)]
@@ -73,17 +74,17 @@ for ind, l_mat_cur in enumerate(L_MAT_list):
     V_opt_set_bell[ind] = V_bell
     A_opt_set_bell[ind] = A_bell 
     RESset_bell[ind] = GetOptResultList(V_bell,A_bell, TransProbSet[ind], ParamsSet[ind])
-     
+      
     # Myopic
     V_myo, A_myo = NaiveSolver_Myopic(TransProbSet[ind], ParamsSet[ind])
     RESset_myo[ind] = GetOptResultList(V_myo,A_myo, TransProbSet[ind], ParamsSet[ind])
-    
+     
     # Taking sides
     V_side, A_side = NaiveSolver_Side(TransProbSet[ind], ParamsSet[ind])
     RESset_side[ind] = GetOptResultList(V_side,A_side, TransProbSet[ind], ParamsSet[ind])
-    
+     
     # rndmzd
-    RANDOM_COUNT = 10
+    RANDOM_COUNT = 50
     RE = []
     for rcount in range(RANDOM_COUNT):
         print "RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
@@ -96,6 +97,21 @@ for ind, l_mat_cur in enumerate(L_MAT_list):
     for i in range(len(RE)):
         RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
     RESset_rnd[ind] = RE
+    
+    # Taking sides plus random actions
+    RANDOM_COUNT = 50
+    RE = []
+    for rcount in range(RANDOM_COUNT):
+        print "SIDELY RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
+        V_sidernd, A_sidernd = NaiveSolver_SideRandom(TransProbSet[ind], ParamsSet[ind])
+        RE_sidernd = GetOptResultList(V_sidernd,A_sidernd, TransProbSet[ind], ParamsSet[ind])
+        if rcount == 0:
+            RE = [0.0 for _ in range(len(RE_sidernd))]
+        for i in range(len(RE_sidernd)):
+            RE[i] = RE[i] + RE_sidernd[i]
+    for i in range(len(RE)):
+        RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
+    RESset_sidernd[ind] = RE
     
 toc = timeit.default_timer()
 print
@@ -110,6 +126,7 @@ pickle.dump(RESset_bell, open("../results/LocDistr_changing/bell","w"))
 pickle.dump(RESset_myo, open("../results/LocDistr_changing/myo","w"))
 pickle.dump(RESset_side, open("../results/LocDistr_changing/side","w"))
 pickle.dump(RESset_rnd, open("../results/LocDistr_changing/rnd","w"))
+pickle.dump(RESset_sidernd, open("../results/LocDistr_changing/sidernd","w"))
 pickle.dump(V_opt_set_bell, open("../results/LocDistr_changing/V_opt_bell","w"))
 pickle.dump(A_opt_set_bell, open("../results/LocDistr_changing/A_opt_bell","w"))
 print "Finished"

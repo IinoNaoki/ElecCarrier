@@ -13,6 +13,11 @@ from multiprocessing import Process, Queue, Array, Value
 
 
 def ImmediateCost(l1,e1,n1,p1, act, params):
+    def SellingPriceIntegral(params):
+        _LAM = params['LAM']
+        _R = params['R_COVERAGE']
+        
+        
     # Initializing the price function
     if params.has_key('PRICE_FUNC'):
         Price_Func = params['PRICE_FUNC']
@@ -182,4 +187,48 @@ def NaiveSolver_Side(TransProb, params):
         if delta< params['DELTA']:
             print "Taking side action scheme [DONE]"
             print
+            return V_op, A_op
+
+
+
+def NaiveSolver_SideRandom(TransProb, params):
+    print "Random..."
+    rangeL, rangeE, rangeN, rangeP = range(params['L']), range(params['E']), range(params['N']), range(params['P'])
+#     _len_L, _len_E, _len_N, _len_P = params['L'], params['E'], params['N'], params['P']
+
+    V_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ))
+    A_op = np.zeros(( params['L'], params['E'], params['N'], params['P'] ), dtype=np.int)
+    
+    for l1 in rangeL:
+        for e1 in rangeE:
+            for n1 in rangeN:
+                for p1 in rangeP:
+                    if l1 in params['L_NC']:
+                        A_op[l1][e1][n1][p1] = 0
+                    elif l1 in params['L_B']:
+                        A_op[l1][e1][n1][p1] = random.randint(0,1)
+                    elif l1 in params['L_S']:
+                        A_op[l1][e1][n1][p1] = random.randint(0,2)
+                    else:
+                        A_op[l1][e1][n1][p1] = 0
+    
+    while 1:
+        delta = 0.0
+        for l1 in rangeL:
+            for e1 in rangeE:
+                for n1 in rangeN:
+                    for p1 in rangeP:
+                        _v_old = V_op[l1][e1][n1][p1]
+                        act = A_op[l1][e1][n1][p1]
+                        _s_tmp = 0.0
+                        for l2 in rangeL:
+                            for e2 in rangeE:
+                                for n2 in rangeN:
+                                    for p2 in rangeP:
+                                        _s_tmp = _s_tmp + TransProb[l1][e1][n1][p1][l2][e2][n2][p2][act] * V_op[l2][e2][n2][p2]
+                        V_op[l1][e1][n1][p1] = ImmediateCost(l1,e1,n1,p1, act, params) + params['GAM'] * _s_tmp
+                        
+                        delta = delta if delta>np.fabs(V_op[l1][e1][n1][p1]-_v_old) else np.fabs(V_op[l1][e1][n1][p1]-_v_old)
+        print "Delta=",delta
+        if delta < params['DELTA']:
             return V_op, A_op

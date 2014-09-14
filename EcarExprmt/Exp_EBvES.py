@@ -1,5 +1,5 @@
 '''
-Created on Sep 3, 2014
+Created on Sep 14, 2014
 
 @author: yzhang28
 '''
@@ -20,22 +20,23 @@ from EcarCore.header import *
 # PARAMETERS
 ############################################
 L = 3
-# left blank purposely for E
+E = 5
 # N Calculated from LAM and R_COVERAGE
 P = 3
 A = 3
 L_NC, L_B, L_S = [0], [1], [2]
-E_B, E_S = 1, 1
+# E_B, E_S = 1, 1
+# Left blank in purpose since E_B and E_S are changing
 GAM = 0.95
 DELTA = 0.01
 LAM = 0.005
 R_COVERAGE = 10.0
 ############################################
 
+EBvES_list = [[5,1], [3,1], [1,1], [1,3], [1,5]]
+EBvES_list_countable = range(1,len(EBvES_list)+1)
 
-E_list = [1,2,3,4,5,6,7,8,9,10]
-# E_list = [1,2,3,4,5]
-expnum = len(E_list)
+expnum = len(EBvES_list)
 
 ParamsSet = [None for _ in range(expnum)]
 TransProbSet = [None for _ in range(expnum)]
@@ -51,16 +52,16 @@ A_opt_set_bell = [None for _ in range(expnum)]
 
 tic = timeit.default_timer()
 
-for ind, e_cur in enumerate(E_list):
+for ind, EBvES_cur in enumerate(EBvES_list):
     print "---- ROUND:", ind+1,
     print "out of", expnum
     N = GetUpperboundN(LAM, R_COVERAGE)[0]
-    ParamsSet[ind] = {'L': L, 'E': e_cur, 'N': N, 'P': P, \
+    ParamsSet[ind] = {'L': L, 'E': E, 'N': N, 'P': P, \
                       'A': A, \
                       'L_NC': L_NC, 'L_B': L_B, 'L_S': L_S, \
-                      'E_B': E_B, 'E_S': E_S, \
+                      'E_B': EBvES_cur[0], 'E_S': EBvES_cur[1], \
                       'GAM': GAM, 'DELTA': DELTA, \
-                      'LAM': LAM, 'R_COVERAGE': R_COVERAGE
+                      'LAM': LAM, 'R_COVERAGE': R_COVERAGE,
                       }
     TransProbSet[ind] = BuildTransMatrix_Para(ParamsSet[ind])
     
@@ -73,7 +74,7 @@ for ind, e_cur in enumerate(E_list):
     # Myopic
     V_myo, A_myo = NaiveSolver_Myopic(TransProbSet[ind], ParamsSet[ind])
     RESset_myo[ind] = GetOptResultList(V_myo,A_myo, TransProbSet[ind], ParamsSet[ind])
-      
+     
     # Taking sides
     V_side, A_side = NaiveSolver_Side(TransProbSet[ind], ParamsSet[ind])
     RESset_side[ind] = GetOptResultList(V_side,A_side, TransProbSet[ind], ParamsSet[ind])
@@ -92,7 +93,7 @@ for ind, e_cur in enumerate(E_list):
     for i in range(len(RE)):
         RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
     RESset_rnd[ind] = RE
-
+     
     # Taking sides plus random actions
     RANDOM_COUNT = 50
     RE = []
@@ -112,16 +113,16 @@ toc = timeit.default_timer()
 print
 print "Total time spent: ",
 print toc - tic
-    
+
 print "Dumping...",
-pickle.dump(expnum, open("../results/E_changing/expnum","w"))
-pickle.dump(ParamsSet, open("../results/E_changing/Paramsset","w"))
-pickle.dump(E_list, open("../results/E_changing/xaxis","w"))
-pickle.dump(RESset_bell, open("../results/E_changing/bell","w"))
-pickle.dump(RESset_myo, open("../results/E_changing/myo","w"))
-pickle.dump(RESset_side, open("../results/E_changing/side","w"))
-pickle.dump(RESset_rnd, open("../results/E_changing/rnd","w"))
-pickle.dump(RESset_sidernd, open("../results/E_changing/sidernd","w"))
-pickle.dump(V_opt_set_bell, open("../results/E_changing/V_opt_bell","w"))
-pickle.dump(A_opt_set_bell, open("../results/E_changing/A_opt_bell","w"))
+pickle.dump(expnum, open("../results/EBvES_changing/expnum","w"))
+pickle.dump(ParamsSet, open("../results/EBvES_changing/Paramsset","w"))
+pickle.dump(EBvES_list_countable, open("../results/EBvES_changing/xaxis","w"))
+pickle.dump(RESset_bell, open("../results/EBvES_changing/bell","w"))
+pickle.dump(RESset_myo, open("../results/EBvES_changing/myo","w"))
+pickle.dump(RESset_side, open("../results/EBvES_changing/side","w"))
+pickle.dump(RESset_rnd, open("../results/EBvES_changing/rnd","w"))
+pickle.dump(RESset_sidernd, open("../results/EBvES_changing/sidernd","w"))
+pickle.dump(V_opt_set_bell, open("../results/EBvES_changing/V_opt_bell","w"))
+pickle.dump(A_opt_set_bell, open("../results/EBvES_changing/A_opt_bell","w"))
 print "Finished"

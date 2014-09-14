@@ -44,6 +44,7 @@ RESset_bell = [None for _ in range(expnum)]
 RESset_myo = [None for _ in range(expnum)]
 RESset_side = [None for _ in range(expnum)]
 RESset_rnd = [None for _ in range(expnum)]
+RESset_sidernd = [None for _ in range(expnum)]
 
 V_opt_set_bell = [None for _ in range(expnum)]
 A_opt_set_bell = [None for _ in range(expnum)]
@@ -68,29 +69,44 @@ for ind, lam_cur in enumerate(LAM_list):
     V_opt_set_bell[ind] = V_bell
     A_opt_set_bell[ind] = A_bell 
     RESset_bell[ind] = GetOptResultList(V_bell,A_bell, TransProbSet[ind], ParamsSet[ind])
-     
+      
     # Myopic
     V_myo, A_myo = NaiveSolver_Myopic(TransProbSet[ind], ParamsSet[ind])
     RESset_myo[ind] = GetOptResultList(V_myo,A_myo, TransProbSet[ind], ParamsSet[ind])
-    
+     
     # Taking sides
     V_side, A_side = NaiveSolver_Side(TransProbSet[ind], ParamsSet[ind])
     RESset_side[ind] = GetOptResultList(V_side,A_side, TransProbSet[ind], ParamsSet[ind])
-    
+     
     # rndmzd
-#     RANDOM_COUNT = 10
-#     RE = []
-#     for rcount in range(RANDOM_COUNT):
-#         print "RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
-#         V_rnd, A_rnd = NaiveSolver_Rnd(TransProbSet[ind], ParamsSet[ind])
-#         RE_rnd = GetOptResultList(V_rnd,A_rnd, TransProbSet[ind], ParamsSet[ind])
-#         if rcount == 0:
-#             RE = [0.0 for _ in range(len(RE_rnd))]
-#         for i in range(len(RE_rnd)):
-#             RE[i] = RE[i] + RE_rnd[i]
-#     for i in range(len(RE)):
-#         RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
-#     RESset_rnd[ind] = RE
+    RANDOM_COUNT = 50
+    RE = []
+    for rcount in range(RANDOM_COUNT):
+        print "RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
+        V_rnd, A_rnd = NaiveSolver_Rnd(TransProbSet[ind], ParamsSet[ind])
+        RE_rnd = GetOptResultList(V_rnd,A_rnd, TransProbSet[ind], ParamsSet[ind])
+        if rcount == 0:
+            RE = [0.0 for _ in range(len(RE_rnd))]
+        for i in range(len(RE_rnd)):
+            RE[i] = RE[i] + RE_rnd[i]
+    for i in range(len(RE)):
+        RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
+    RESset_rnd[ind] = RE
+    
+    # Taking sides plus random actions
+    RANDOM_COUNT = 50
+    RE = []
+    for rcount in range(RANDOM_COUNT):
+        print "SIDELY RANDOM: %d/%d running..." % (rcount+1,RANDOM_COUNT)
+        V_sidernd, A_sidernd = NaiveSolver_SideRandom(TransProbSet[ind], ParamsSet[ind])
+        RE_sidernd = GetOptResultList(V_sidernd,A_sidernd, TransProbSet[ind], ParamsSet[ind])
+        if rcount == 0:
+            RE = [0.0 for _ in range(len(RE_sidernd))]
+        for i in range(len(RE_sidernd)):
+            RE[i] = RE[i] + RE_sidernd[i]
+    for i in range(len(RE)):
+        RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
+    RESset_sidernd[ind] = RE
     
 toc = timeit.default_timer()
 print
@@ -105,6 +121,7 @@ pickle.dump(RESset_bell, open("../results/LAM_changing/bell","w"))
 pickle.dump(RESset_myo, open("../results/LAM_changing/myo","w"))
 pickle.dump(RESset_side, open("../results/LAM_changing/side","w"))
 pickle.dump(RESset_rnd, open("../results/LAM_changing/rnd","w"))
+pickle.dump(RESset_sidernd, open("../results/LAM_changing/sidernd","w"))
 pickle.dump(V_opt_set_bell, open("../results/LAM_changing/V_opt_bell","w"))
 pickle.dump(A_opt_set_bell, open("../results/LAM_changing/A_opt_bell","w"))
 print "Finished"
