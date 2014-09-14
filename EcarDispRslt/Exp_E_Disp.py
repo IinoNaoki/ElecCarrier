@@ -15,6 +15,8 @@ from matplotlib.markers import MarkerStyle
 sys.path.append("..")
 from EcarCore.MDPfunc import *
 
+from matplotlib.backends.backend_pdf import PdfPages
+
 expnum = pickle.load(open("../results/E_changing/expnum","r"))
 
 x_axis_list = pickle.load(open("../results/E_changing/xaxis","r"))
@@ -67,14 +69,16 @@ plot(x_axis_list,y_v_avg_myo,color='green',markerfacecolor='none', markeredgecol
 plot(x_axis_list,y_v_avg_side,color='blue',markerfacecolor='none', markeredgecolor='blue', marker='s',markersize=8,label='SIDE')
 plot(x_axis_list,y_v_avg_rnd,color='black',markerfacecolor='none', markeredgecolor='black', marker='d',markersize=8,label='RND', linestyle='')
 plot(x_axis_list,y_v_avg_sidernd,color='magenta',markerfacecolor='none', markeredgecolor='magenta', marker='x',markersize=8,label='RND', linestyle='')
-xlabel('Maximum energy capacity $E$',fontsize=16)
+xlabel('Max. capacity $E$ of energy gateway',fontsize=14)
 ylabel('Expected utility',fontsize=16)
 subplots_adjust(top=0.93,bottom=0.16,left=0.12, right=0.95)
 # legend(loc='best', ncol=1,fancybox=True,shadow=True)
 legend(loc='best',fancybox=True)
-# locs, labels = plt.yticks()
-# plt.setp(labels, rotation=90)
-  
+locs, labels = plt.yticks()
+plt.setp(labels, rotation=90)
+pp = PdfPages('figure1.pdf')
+plt.savefig(pp, format='pdf')
+pp.close()
   
 # Show steady action 1
 plt.figure(figsize=(4.5,5.0))
@@ -84,15 +88,17 @@ plot(x_axis_list,y_a1_steady_myo,color='green',markerfacecolor='none', markeredg
 plot(x_axis_list,y_a1_steady_side,color='blue',markerfacecolor='none', markeredgecolor='blue', marker='s',markersize=8,label='SIDE')
 plot(x_axis_list,y_a1_steady_rnd,color='black',markerfacecolor='none', markeredgecolor='black', marker='d',markersize=8,label='RND', linestyle='')
 plot(x_axis_list,y_a1_steady_sidernd,color='magenta',markerfacecolor='none', markeredgecolor='magenta', marker='x',markersize=8,label='RND', linestyle='')
-xlabel('Maximum energy capacity $E$',fontsize=16)
-ylabel('Steady action rate 2',fontsize=16)
+xlabel('Max. capacity $E$ of energy gateway',fontsize=14)
+ylabel('Energy charging ($\mathcal{A}=1$) rate',fontsize=16)
 subplots_adjust(top=0.93,bottom=0.16,left=0.12, right=0.95)
-# legend(loc=(0.40,0.65), ncol=2,fancybox=True,shadow=True)
 legend(loc=(0.6,0.58),fancybox=True)
-# locs, labels = plt.yticks()
-# plt.setp(labels, rotation=90)
 # xlim([2,31])
 ylim([-0.02,0.72])
+locs, labels = plt.yticks()
+plt.setp(labels, rotation=90)
+pp = PdfPages('figure2.pdf')
+plt.savefig(pp, format='pdf')
+pp.close()
     
     
 # Show steady action 2
@@ -103,16 +109,18 @@ plot(x_axis_list,y_a2_steady_myo,color='green',markerfacecolor='none', markeredg
 plot(x_axis_list,y_a2_steady_side,color='blue',markerfacecolor='none', markeredgecolor='blue', marker='s',markersize=8,label='SIDE', linestyle='--')
 plot(x_axis_list,y_a2_steady_rnd,color='black',markerfacecolor='none', markeredgecolor='black', marker='d',markersize=8,label='RND', linestyle='')
 plot(x_axis_list,y_a2_steady_sidernd,color='magenta',markerfacecolor='none', markeredgecolor='magenta', marker='x',markersize=8,label='RND', linestyle='')
-xlabel('Maximum energy capacity $E$',fontsize=16)
-ylabel('Steady action rate 1',fontsize=16)
+xlabel('Max. capacity $E$ of energy gateway',fontsize=14)
+ylabel('Energy transferring ($\mathcal{A}=2$) rate',fontsize=16)
 subplots_adjust(top=0.93,bottom=0.16,left=0.12, right=0.95)
 # legend(loc=(0.40,0.65), ncol=2,fancybox=True,shadow=True)
 legend(loc=(0.6,0.56),fancybox=True)
-# locs, labels = plt.yticks()
-# plt.setp(labels, rotation=90)
 # xlim([2,31])
 ylim([-0.02,0.72])
-  
+locs, labels = plt.yticks()
+plt.setp(labels, rotation=90)
+pp = PdfPages('figure3.pdf')
+plt.savefig(pp, format='pdf')
+pp.close()
    
    
 # Steady state of E
@@ -123,13 +131,16 @@ plot(x_axis_list,y_e_steady_myo,color='green',markerfacecolor='none', markeredge
 plot(x_axis_list,y_e_steady_side,color='blue',markerfacecolor='none', markeredgecolor='blue', marker='s',markersize=8,label='SIDE')
 plot(x_axis_list,y_e_steady_rnd,color='black',markerfacecolor='none', markeredgecolor='black', marker='d',markersize=8,label='RND', linestyle='')
 plot(x_axis_list,y_e_steady_sidernd,color='magenta',markerfacecolor='none', markeredgecolor='magenta', marker='x',markersize=8,label='RND', linestyle='')
-xlabel('Maximum energy capacity $E$',fontsize=16)
-ylabel('Steady state energy level',fontsize=16)
+xlabel('Max. capacity $E$ of energy gateway',fontsize=14)
+ylabel('Steady energy state of energy gateway',fontsize=14)
 subplots_adjust(top=0.93,bottom=0.16,left=0.12, right=0.95)
 legend(loc=(0.355,0.48), ncol=2,fancybox=True)
-# locs, labels = plt.yticks()
-# plt.setp(labels, rotation=90)
 ylim([-0.02, 1.27])
+locs, labels = plt.yticks()
+plt.setp(labels, rotation=90)
+pp = PdfPages('figure4.pdf')
+plt.savefig(pp, format='pdf')
+pp.close()
     
     
 # QoS
@@ -140,12 +151,15 @@ plot(x_axis_list,y_QoS_steady_myo,color='green',markerfacecolor='none', markered
 plot(x_axis_list,y_QoS_steady_side,color='blue',markerfacecolor='none', markeredgecolor='blue', marker='s',markersize=8,label='SIDE')
 plot(x_axis_list,y_QoS_steady_rnd,color='black',markerfacecolor='none', markeredgecolor='black', marker='d',markersize=8,label='RND', linestyle='')
 plot(x_axis_list,y_QoS_steady_sidernd,color='magenta',markerfacecolor='none', markeredgecolor='magenta', marker='x',markersize=8,label='RND', linestyle='')
-xlabel('Maximum energy capacity $E$',fontsize=16)
-ylabel('QoS of energy charging',fontsize=16)
+xlabel('Max. capacity $E$ of energy gateway',fontsize=14)
+ylabel('Transferring QoS of energy gateway',fontsize=16)
 subplots_adjust(top=0.93,bottom=0.16,left=0.12, right=0.95)
 legend(loc=(0.31, 0.66), ncol=2,fancybox=True)
-# locs, labels = plt.yticks()
-# plt.setp(labels, rotation=90)
 ylim([-0.005, 0.26])
+locs, labels = plt.yticks()
+plt.setp(labels, rotation=90)
+pp = PdfPages('figure5.pdf')
+plt.savefig(pp, format='pdf')
+pp.close()
 
 show()
