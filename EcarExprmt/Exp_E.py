@@ -34,7 +34,7 @@ R_COVERAGE = 10.0
 
 
 E_list = [1,2,3,4,5,6,7,8,9,10]
-# E_list = [1,2,3,4,5]
+E_list_actual = [i-1 for i in E_list]
 expnum = len(E_list)
 
 ParamsSet = [None for _ in range(expnum)]
@@ -116,7 +116,7 @@ print toc - tic
 print "Dumping...",
 pickle.dump(expnum, open("../results/E_changing/expnum","w"))
 pickle.dump(ParamsSet, open("../results/E_changing/Paramsset","w"))
-pickle.dump(E_list, open("../results/E_changing/xaxis","w"))
+pickle.dump(E_list_actual, open("../results/E_changing/xaxis","w"))
 pickle.dump(RESset_bell, open("../results/E_changing/bell","w"))
 pickle.dump(RESset_myo, open("../results/E_changing/myo","w"))
 pickle.dump(RESset_side, open("../results/E_changing/side","w"))

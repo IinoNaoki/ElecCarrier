@@ -81,23 +81,6 @@ def N_mat(n1, n2, l1, l2, params):
         return 0.0
 
 
-# THIS FUNCTION IS ONLY FOR TEMPORARY USE
-# def N_mat_temp(n1, n2, l1, l2, params):
-#     if (l2 in params['L_NC']) or (l2 in params['L_B']):
-#         if n2==0:
-#             return 1.0
-#         else:
-#             return 0.0
-#     elif l2 in params['L_S']:
-#         mat_n = [[1.0/(params['N']) for _ in range(params['N'])] for _ in range(params['N'])]
-#         if (n1 in range(params['N'])) and (n2 in range(params['N'])):
-#             return mat_n[n1][n2]
-#         else:
-#             return 0.0
-#     else:
-#         return 0.0
-
-
 def E_mat(e1, e2, l1, l2,  act, params):
     eta_prob = 0.85 # prob of succ charging
     xi_prob = 0.99  # prob of succ transferring

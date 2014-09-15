@@ -20,7 +20,7 @@ from EcarCore.header import *
 # PARAMETERS
 ############################################
 L = 3
-E = 5
+E = 1 + 5 #6 elements: {0, 1,2,3,4,5}
 # N Calculated from LAM and R_COVERAGE
 P = 3
 A = 3
