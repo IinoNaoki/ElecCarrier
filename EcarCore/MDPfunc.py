@@ -18,12 +18,14 @@ def ImmediateCost(l1,e1,n1,p1, act, params):
         _R = params['R_COVERAGE']
         
         
-    # Initializing the price function
-    if params.has_key('PRICE_FUNC'):
-        Price_Func = params['PRICE_FUNC']
-    else:
-        Price_Func = [0.1, 1.0, 5.0]
+#     # Initializing the price function
+#     if params.has_key('PRICE_FUNC'):
+#         Price_Func = params['PRICE_FUNC']
+#     else:
+#         Price_Func = [0.1, 1.0, 5.0]
         
+    Price_Func = [0.1, 1.0, 5.0]
+    
     if (l1 in params['L_B']) and (act==1):
         return -1.0*params['E_B'] * Price_Func[p1]
     elif (l1 in params['L_S']) and (e1>=params['E_S']) and (act==2):

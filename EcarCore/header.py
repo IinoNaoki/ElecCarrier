@@ -29,14 +29,19 @@ def L_mat(l1, l2, params):
         mat_l = [[0.02, 0.29, 0.69],
                  [0.02, 0.29, 0.69],
                  [0.02, 0.29, 0.69]]
+    
     if (l1 in range(params['L'])) and (l2 in range(params['L'])):
         return mat_l[l1][l2]
     else:
         return 0.0
 
 def P_mat(p1, p2, params):
-    mat_p = [[1.0/(params['P']) for _ in range(params['P'])] for _ in range(params['P'])]
     
+    if params.has_key('P_MAT'):
+        mat_p = params['P_MAT']
+    else:
+        mat_p = [[1.0/(params['P']) for _ in range(params['P'])] for _ in range(params['P'])]
+        
     if (p1 in range(params['P'])) and (p2 in range(params['P'])):
         return mat_p[p1][p2]
     else:

@@ -33,7 +33,7 @@ LAM = 0.005
 R_COVERAGE = 10.0
 ############################################
 
-EBvES_list = [[5,1], [3,1], [1,1], [1,3], [1,5]]
+EBvES_list = [[4,1], [2,1], [1,1], [1,2], [1,4]]
 EBvES_list_countable = range(1,len(EBvES_list)+1)
 
 expnum = len(EBvES_list)
@@ -93,7 +93,7 @@ for ind, EBvES_cur in enumerate(EBvES_list):
     for i in range(len(RE)):
         RE[i] = RE[i]*1.0/(1.0*RANDOM_COUNT)
     RESset_rnd[ind] = RE
-     
+      
     # Taking sides plus random actions
     RANDOM_COUNT = 50
     RE = []
