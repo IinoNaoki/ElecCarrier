@@ -162,4 +162,4 @@ pp = PdfPages('figure5.pdf')
 plt.savefig(pp, format='pdf')
 pp.close()
 
-show()
+# show()
