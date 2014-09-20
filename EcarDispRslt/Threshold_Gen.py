@@ -31,11 +31,11 @@ expnum_bell_E_changing = pickle.load(open("../results/E_changing/expnum","r"))
 # expnum_bell_LAM_changing = pickle.load(open("../results/LAM_changing/expnum","r"))
 
 # f_v_e_charging = open('../V_opt_set_bell_E_changing', 'w')
-    
+
+sys.stdout = open('../results/Amat_N_P', 'w')
 for i in range(expnum_bell_E_changing):
     L = params_set_bell_E_changing[i]['L']
     E = params_set_bell_E_changing[i]['E']
-    sys.stdout = open('../results/Amat_N_P', 'w')
     for _l in range(L):
         for _e in range(E):
             print
@@ -44,10 +44,11 @@ for i in range(expnum_bell_E_changing):
             ShowMatrix(A_opt_set_bell_E_changing[i], 'a', ['l','e'], [_l,_e], params_set_bell_E_changing[i])
             print
 
+
+sys.stdout = open('../results/Amat_E_P', 'w')
 for i in range(expnum_bell_E_changing):
     L = params_set_bell_E_changing[i]['L']
     N = params_set_bell_E_changing[i]['N']
-    sys.stdout = open('../results/Amat_E_P', 'w')
     for _l in range(L):
         for _n in range(N):
             print
@@ -55,10 +56,11 @@ for i in range(expnum_bell_E_changing):
             print "state N =", _n
             ShowMatrix(A_opt_set_bell_E_changing[i], 'a', ['l','n'], [_l,_n], params_set_bell_E_changing[i])
 
+
+sys.stdout = open('../results/Amat_E_N', 'w')
 for i in range(expnum_bell_E_changing):
     L = params_set_bell_E_changing[i]['L']
     P = params_set_bell_E_changing[i]['P']
-    sys.stdout = open('../results/Amat_E_N', 'w')
     for _l in range(L):
         for _p in range(P):
             print
@@ -67,10 +69,11 @@ for i in range(expnum_bell_E_changing):
             ShowMatrix(A_opt_set_bell_E_changing[i], 'a', ['l','p'], [_l,_p], params_set_bell_E_changing[i])
             print
             
+
+sys.stdout = open('../results/Amat_L_P', 'w')
 for i in range(expnum_bell_E_changing):
     E = params_set_bell_E_changing[i]['E']
     N = params_set_bell_E_changing[i]['N']
-    sys.stdout = open('../results/Amat_L_P', 'w')
     for _e in range(E):
         for _n in range(N):
             print
@@ -79,10 +82,11 @@ for i in range(expnum_bell_E_changing):
             ShowMatrix(A_opt_set_bell_E_changing[i], 'a', ['e','n'], [_e,_n], params_set_bell_E_changing[i])
             print
             
+
+sys.stdout = open('../results/Amat_L_N', 'w')
 for i in range(expnum_bell_E_changing):
     E = params_set_bell_E_changing[i]['E']
     P = params_set_bell_E_changing[i]['P']
-    sys.stdout = open('../results/Amat_L_N', 'w')
     for _e in range(E):
         for _p in range(P):
             print
@@ -90,11 +94,12 @@ for i in range(expnum_bell_E_changing):
             print "state P =", _p
             ShowMatrix(A_opt_set_bell_E_changing[i], 'a', ['e','p'], [_e,_p], params_set_bell_E_changing[i])
             print
-            
+
+
+sys.stdout = open('../results/Amat_L_E', 'w')          
 for i in range(expnum_bell_E_changing):
     N = params_set_bell_E_changing[i]['N']
     P = params_set_bell_E_changing[i]['P']
-    sys.stdout = open('../results/Amat_L_E', 'w')
     for _n in range(N):
         for _p in range(P):
             print
