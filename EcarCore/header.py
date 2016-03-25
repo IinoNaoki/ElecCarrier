@@ -406,7 +406,7 @@ def GetOptResultList(V,A, transmat, params):
     _act = np.bincount(A_linear)
     while len(_act) < 3:
         _act = np.append(_act, 0)
-    THE Above CODE IS NOT THAT GOOD
+    #THE Above CODE IS NOT THAT GOOD
     a1_avg = _act[1]*1.0/(1.0*len(A_linear)) # ACT_1_AVG
     a2_avg = _act[2]*1.0/(1.0*len(A_linear)) # ACT_2_AVG
     
